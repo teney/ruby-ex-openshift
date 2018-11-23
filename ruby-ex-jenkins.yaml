@@ -53,5 +53,3 @@ spec:
   - github:
       secret: secret101
     type: GitHub
-status:
-  lastVersion: 1
