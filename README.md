@@ -5,6 +5,7 @@ Run ```oc create -f ruby-ex-all.yaml``` to create the following:
 - buildConfig for app
 - route 
 - service
+- imageStream
 
 Run ```oc create -f ruby-ex-jenkins.yaml``` to create the jenkins pipeline
 
