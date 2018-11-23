@@ -1,0 +1,57 @@
+apiVersion: build.openshift.io/v1
+kind: BuildConfig
+metadata:
+  annotations:
+    description: Trigger a Jenkins build when push to the repository
+    openshift.io/generated-by: OpenShiftNewApp
+  creationTimestamp: 2018-11-23T18:14:26Z
+  labels:
+    app: ruby-ex
+  name: ruby-ex-jenkins
+  namespace: myproject
+  resourceVersion: "68185"
+  selfLink: /apis/build.openshift.io/v1/namespaces/myproject/buildconfigs/ruby-ex-jenkins
+  uid: 9ce90f87-ef4b-11e8-a7f6-08002776835a
+spec:
+  failedBuildsHistoryLimit: 5
+  nodeSelector: {}
+  output: {}
+  postCommit: {}
+  resources: {}
+  runPolicy: Serial
+  source:
+    contextDir: ruby-ex
+    git:
+      uri: http://gogs-myproject.192.168.99.100.nip.io/teney/ruby-ex.git
+    sourceSecret:
+      name: sshsecret
+    type: Git
+  strategy:
+    jenkinsPipelineStrategy:
+      jenkinsfile: |-
+        pipeline {
+          agent any
+
+          stages {
+            stage('build') {
+              steps {
+                openshiftBuild(bldCfg: 'ruby-ex', showBuildLogs: 'true')
+              }
+            }
+
+            stage('deploy') {
+              steps {
+                openshiftDeploy(depCfg: 'ruby-ex')
+              }
+            }
+          }
+        }
+    type: JenkinsPipeline
+  successfulBuildsHistoryLimit: 5
+  triggers:
+  - type: ConfigChange
+  - github:
+      secret: secret101
+    type: GitHub
+status:
+  lastVersion: 1
