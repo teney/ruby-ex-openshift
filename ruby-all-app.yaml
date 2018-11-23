@@ -1,0 +1,152 @@
+apiVersion: v1
+items:
+- apiVersion: v1
+  kind: Service
+  metadata:
+    labels:
+      app: ruby-ex
+    name: ruby-ex
+    namespace: myproject
+  spec:
+    clusterIP: 172.30.90.46
+    ports:
+    - name: 8080-tcp
+      port: 8080
+      protocol: TCP
+      targetPort: 8080
+    selector:
+      deploymentconfig: ruby-ex
+    sessionAffinity: None
+    type: ClusterIP
+  status:
+    loadBalancer: {}
+- apiVersion: apps.openshift.io/v1
+  kind: DeploymentConfig
+  metadata:
+    generation: 1
+    labels:
+      app: ruby-ex
+    name: ruby-ex
+    namespace: myproject
+  spec:
+    replicas: 1
+    selector:
+      deploymentconfig: ruby-ex
+    strategy:
+      activeDeadlineSeconds: 21600
+      resources: {}
+      rollingParams:
+        intervalSeconds: 1
+        maxSurge: 25%
+        maxUnavailable: 25%
+        timeoutSeconds: 600
+        updatePeriodSeconds: 1
+      type: Rolling
+    template:
+      metadata:
+        creationTimestamp: null
+        labels:
+          app: ruby-ex
+          deploymentconfig: ruby-ex
+      spec:
+        containers:
+        - image: ruby-ex:latest
+          imagePullPolicy: Always
+          name: ruby-ex
+          ports:
+          - containerPort: 8080
+            protocol: TCP
+          resources: {}
+          terminationMessagePath: /dev/termination-log
+          terminationMessagePolicy: File
+        dnsPolicy: ClusterFirst
+        restartPolicy: Always
+        schedulerName: default-scheduler
+        securityContext: {}
+        terminationGracePeriodSeconds: 30
+    test: false
+    triggers:
+    - imageChangeParams:
+        containerNames:
+        - ruby-ex
+        from:
+          kind: ImageStreamTag
+          name: ruby-ex:latest
+          namespace: myproject
+      type: ImageChange
+    - type: ConfigChange
+- apiVersion: build.openshift.io/v1
+  kind: BuildConfig
+  metadata:
+    labels:
+      app: ruby-ex
+    name: ruby-ex
+    namespace: myproject
+  spec:
+    nodeSelector: null
+    output:
+      to:
+        kind: ImageStreamTag
+        name: ruby-ex:latest
+    postCommit: {}
+    resources: {}
+    runPolicy: Serial
+    source:
+      git:
+        ref: master
+        uri: http://gogs-myproject.192.168.99.100.nip.io/teney/ruby-ex
+      type: Git
+    strategy:
+      sourceStrategy:
+        from:
+          kind: ImageStreamTag
+          name: ruby:2.5
+          namespace: openshift
+      type: Source
+    triggers:
+    - generic:
+        secret: 62b21adb95aa4084
+      type: Generic
+- apiVersion: image.openshift.io/v1
+  kind: ImageStream
+  metadata:
+    generation: 1
+    labels:
+      app: ruby-ex
+    name: ruby-ex
+    namespace: myproject
+    resourceVersion: "85494"
+    selfLink: /apis/image.openshift.io/v1/namespaces/myproject/imagestreams/ruby-ex
+    uid: 69d3e040-ef55-11e8-a7f6-08002776835a
+  spec:
+    lookupPolicy:
+      local: false
+- apiVersion: route.openshift.io/v1
+  kind: Route
+  metadata:
+    labels:
+      app: ruby-ex
+    name: ruby-ex
+    namespace: myproject
+  spec:
+    host: ruby-ex-myproject.192.168.99.100.nip.io
+    port:
+      targetPort: 8080-tcp
+    to:
+      kind: Service
+      name: ruby-ex
+      weight: 100
+    wildcardPolicy: None
+  status:
+    ingress:
+    - conditions:
+      - lastTransitionTime: 2018-11-23T19:24:36Z
+        status: "True"
+        type: Admitted
+      host: ruby-ex-myproject.192.168.99.100.nip.io
+      routerName: router
+      wildcardPolicy: None
+kind: List
+metadata:
+  resourceVersion: ""
+  selfLink: ""
