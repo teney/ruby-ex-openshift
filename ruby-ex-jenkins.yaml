@@ -3,8 +3,6 @@ kind: BuildConfig
 metadata:
   annotations:
     description: Trigger a Jenkins build when push to the repository
-    openshift.io/generated-by: OpenShiftNewApp
-  creationTimestamp: 2018-11-23T18:14:26Z
   labels:
     app: ruby-ex
   name: ruby-ex-jenkins
